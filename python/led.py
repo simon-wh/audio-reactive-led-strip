@@ -16,6 +16,9 @@ elif config.DEVICE == 'pi':
                                        config.LED_FREQ_HZ, config.LED_DMA,
                                        config.LED_INVERT, config.BRIGHTNESS)
     strip.begin()
+elif config.DEVICE == 'fadecandy':
+    import opc
+    client = opc.Client('localhost:7890')
 elif config.DEVICE == 'blinkstick':
     from blinkstick import blinkstick
     import signal
@@ -108,6 +111,33 @@ def _update_pi():
     _prev_pixels = np.copy(p)
     strip.show()
 
+def _update_fadecandy():
+    """Writes new LED values to the fadecandy controller board
+
+    
+    """
+    global pixels
+    
+    # Truncate values and cast to integer
+    pixels = np.clip(pixels, 0, 255).astype(int)
+    # Optional gamma correction
+    p = _gamma[pixels] if config.SOFTWARE_GAMMA_CORRECTION else np.copy(pixels)
+    # Read the rgb values
+    r = p[0][:].astype(int)
+    g = p[1][:].astype(int)
+    b = p[2][:].astype(int)
+
+    #create array in which we will store the led states
+    newstrip = [None]*(config.N_PIXELS)
+
+    for i in range(config.N_PIXELS):
+        newstrip[i] = (r[i], g[i], b[i])
+    
+    for c in config.REPLICATE_ON_CHANNELS:
+        #send the data to the fadecandy
+        client.put_pixels(newstrip, channel=c)
+    
+
 def _update_blinkstick():
     """Writes new LED values to the Blinkstick.
         This function updates the LED strip with new values.
@@ -143,6 +173,8 @@ def update():
         _update_pi()
     elif config.DEVICE == 'blinkstick':
         _update_blinkstick()
+    elif config.DEVICE == 'fadecandy':
+        _update_fadecandy()
     else:
         raise ValueError('Invalid device selected')
 
