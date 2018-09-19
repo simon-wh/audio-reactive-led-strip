@@ -45,6 +45,9 @@ if DEVICE == 'blinkstick':
 if DEVICE == 'fadecandy':
     SOFTWARE_GAMMA_CORRECTION = True
     REPLICATE_ON_CHANNELS = [0]
+    """Lighting channels to apply the lighting to"""
+    OPC_SERVER = 'localhost:7890'
+    """Server Address of the Fadecandy server"""
 
 """Whether or not to display a PyQtGraph GUI plot of visualization"""
 

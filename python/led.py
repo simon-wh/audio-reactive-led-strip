@@ -18,7 +18,7 @@ elif config.DEVICE == 'pi':
     strip.begin()
 elif config.DEVICE == 'fadecandy':
     import opc
-    client = opc.Client('localhost:7890')
+    client = opc.Client(config.OPC_SERVER)
 elif config.DEVICE == 'blinkstick':
     from blinkstick import blinkstick
     import signal
